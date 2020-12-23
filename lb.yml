@@ -1,0 +1,36 @@
+- hosts: LoadBalancer
+  tasks:
+  - name: Installing the haproxy in the LB instance
+    package:
+     name: haproxy
+     state: present
+  - name: setting up haproxy file
+    template:
+     src: /root/haproxy.cfg
+     dest: /etc/haproxy/haproxy.cfg
+    notify: "File Changed"
+  handlers:
+  - name: "File Changed"
+    service:
+     name: haproxy
+     state: restarted
+- hosts: WebServers
+  tasks:
+  - name: Installing httpd servers
+    package:
+     name: httpd
+     state: present
+  - name: Installing other packages
+    package:
+     name: php
+     state: present
+  - name: copying the web page 
+    copy:
+     src: /root/web1.php
+     dest: /var/www/html/web1.php
+    notify: "Changed"
+  handlers:
+  - name: "Changed"
+    service:
+     name: httpd
+     state: restarted
